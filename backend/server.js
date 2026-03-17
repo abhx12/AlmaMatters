@@ -7,6 +7,11 @@ const app = express();
 // IMPORT ROUTES
 
 const studentRoutes = require('./routes/studentRoutes');
+const alumniRoutes = require('./routes/alumniRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
+
+const authRoutes = require('./routes/authRoutes');
 
 
 // MIDDLEWARE
@@ -19,6 +24,9 @@ app.use(express.json());
 // ROUTES
 
 app.use("/api/students", studentRoutes);
+app.use("/api/alumni", alumniRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/auth", authRoutes);
 
 
 

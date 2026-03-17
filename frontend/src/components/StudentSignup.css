@@ -1,117 +1,245 @@
-.student-container{
+/* CONTAINER */
 
-min-height:100vh;
+.student-container {
 
-display:flex;
+  min-height: 100vh;
 
-justify-content:center;
+  display: flex;
 
-align-items:center;
+  justify-content: center;
 
-background: var(--nav-gradient);
+  align-items: center;
 
-padding:40px;
+  background: var(--nav-gradient);
 
-}
-
-
-
-.student-form{
-
-background: var(--white);
-
-padding:40px;
-
-width:600px;
-
-border-radius:12px;
-
-box-shadow:0px 8px 25px rgba(0,0,0,0.2);
+  padding: 40px 20px;
 
 }
 
 
 
-.student-form h2{
+/* FORM CARD */
 
-color: var(--alpine-green);
+.student-form {
 
-text-align:center;
+  background: var(--white);
 
-margin-bottom:20px;
+  padding: 40px;
 
-}
+  width: 100%;
 
+  max-width: 650px;
 
+  border-radius: 16px;
 
-section{
+  box-shadow: 0px 12px 35px rgba(0, 0, 0, 0.18);
 
-margin-bottom:20px;
-
-}
-
-
-
-section h3{
-
-color: var(--gold);
-
-margin-bottom:10px;
+  animation: fadeIn 0.4s ease;
 
 }
 
 
 
-input,select{
+/* FADE ANIMATION */
 
-width:100%;
+@keyframes fadeIn {
 
-padding:10px;
+  from {
 
-margin-bottom:10px;
+    opacity: 0;
 
-border-radius:8px;
+    transform: translateY(20px);
 
-border:1px solid var(--creme);
+  }
 
-}
+  to {
 
+    opacity: 1;
 
+    transform: translateY(0);
 
-input:focus{
-
-outline:none;
-
-border:2px solid var(--alpine-green);
+  }
 
 }
 
 
 
-button{
+/* TITLE */
 
-width:100%;
+.student-form h2 {
 
-padding:12px;
+  color: var(--alpine-green);
 
-background: var(--alpine-green);
+  text-align: center;
 
-color: var(--white);
+  margin-bottom: 10px;
 
-border:none;
-
-border-radius:8px;
-
-font-size:16px;
-
-cursor:pointer;
+  font-size: 28px;
 
 }
 
 
 
-button:hover{
+/* STEP HEADING */
 
-background: var(--gold);
+section h3 {
+
+  color: var(--gold);
+
+  margin-bottom: 15px;
+
+  margin-top: 20px;
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+}
+
+
+
+/* INPUT GROUP */
+
+input,
+select {
+
+  width: 50%;
+
+  padding: 12px 14px;
+
+  margin: 0 auto 14px auto;   /* THIS CENTERS INPUT */
+
+  display: block;             /* REQUIRED */
+
+  border-radius: 10px;
+
+  border: 1px solid var(--creme);
+
+  font-size: 14px;
+
+  transition: all 0.25s ease;
+
+  background-color: #fff;
+
+}
+
+
+
+/* INPUT FOCUS */
+
+input:focus,
+select:focus {
+
+  outline: none;
+
+  border: 2px solid var(--alpine-green);
+
+  box-shadow: 0 0 6px rgba(24, 77, 59, 0.25);
+
+}
+
+
+
+/* PLACEHOLDER */
+
+input::placeholder {
+
+  color: #555;
+
+  opacity: 1;
+
+}
+
+
+
+/* BUTTON */
+
+button {
+
+  width: 50%;
+
+  padding: 14px;
+
+  margin: 0 auto 14px auto;   /* THIS CENTERS INPUT */
+
+  display: block;             /* REQUIRED */
+
+  background: var(--alpine-green);
+
+  color: var(--white);
+
+  border: none;
+
+  border-radius: 10px;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+
+}
+
+
+
+/* BUTTON HOVER */
+
+button:hover {
+
+  background: var(--gold);
+
+  transform: translateY(-2px);
+
+  box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+
+}
+
+
+
+/* BUTTON CLICK */
+
+button:active {
+
+  transform: scale(0.98);
+
+}
+
+
+
+/* SECTION SPACING */
+
+section {
+
+  margin-bottom: 25px;
+
+}
+
+
+
+/* MOBILE RESPONSIVE */
+
+@media (max-width: 768px) {
+
+  .student-form {
+
+    padding: 25px;
+
+  }
+
+}
+
+
+
+/* SMALL MOBILE */
+
+@media (max-width: 480px) {
+
+  .student-form {
+
+    padding: 20px;
+
+  }
 
 }

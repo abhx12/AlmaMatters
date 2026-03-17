@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import LandingPage from './components/landerpage';
 import Signup from './components/Signup';
+import Login from './components/loginpage';
 
 import StudentSignup from './components/StudentSignup';
 import AlumniSignup from './components/AlumniSignup';
@@ -22,6 +23,9 @@ function App() {
 
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Login Page */}
+          <Route path="/login" element={<Login />} />
 
 
           {/* Main Signup Role Selection */}

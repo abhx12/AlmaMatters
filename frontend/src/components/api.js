@@ -22,25 +22,15 @@ MULTI STEP STUDENT SIGNUP
 */
 
 export const registerStep = (step, data, studentId) => {
+  return API.post("/students/register-step", { step, data, studentId }).then(res => res.data);
+};
 
-  return API.post(
+export const registerAlumniStep = (step, data, alumniId) => {
+  return API.post("/alumni/register-step", { step, data, alumniId }).then(res => res.data);
+};
 
-    "/students/register-step",
-
-    {
-
-      step: step,
-
-      data: data,
-
-      studentId: studentId
-
-    }
-
-  )
-
-  .then(res => res.data);
-
+export const registerAdminStep = (step, data, adminId) => {
+  return API.post("/admin/register-step", { step, data, adminId }).then(res => res.data);
 };
 
 
@@ -75,16 +65,13 @@ export const updateStudent = (id, data) =>
 
 
 
-export const registerAlumni = (data) =>
+export const loginGoogle = (token) =>
+  API.post("/auth/google-login", { token });
 
-  API.post("/alumni/register", data);
+export const sendOtp = (email) =>
+  API.post("/auth/send-otp", { email });
 
-
-
-export const adminLogin = (data) =>
-
-  API.post("/admin/login", data);
-
-
+export const verifyOtp = (email, otp) =>
+  API.post("/auth/verify-otp", { email, otp });
 
 export default API;

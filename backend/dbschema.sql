@@ -268,3 +268,85 @@ country VARCHAR(100),
 FOREIGN KEY (alumni_id) REFERENCES alumni(alumni_id) ON DELETE CASCADE
 
 );
+
+CREATE TABLE admins (
+
+admin_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+employee_id VARCHAR(50) UNIQUE NOT NULL,
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+);
+
+CREATE TABLE admin_personal_details (
+
+admin_id BIGINT PRIMARY KEY,
+
+first_name VARCHAR(100) NOT NULL,
+
+last_name VARCHAR(100),
+
+full_name VARCHAR(200),
+
+date_of_birth DATE,
+
+gender VARCHAR(10),
+
+profile_photo_url TEXT,
+
+FOREIGN KEY (admin_id) REFERENCES admins(admin_id) ON DELETE CASCADE
+
+);
+
+CREATE TABLE admin_contact_details (
+
+admin_id BIGINT PRIMARY KEY,
+
+email VARCHAR(150),
+
+phone_number VARCHAR(15),
+
+alternate_phone_number VARCHAR(15),
+
+FOREIGN KEY (admin_id) REFERENCES admins(admin_id) ON DELETE CASCADE
+
+);
+
+CREATE TABLE admin_address_details (
+
+admin_id BIGINT PRIMARY KEY,
+
+address_line1 VARCHAR(255),
+
+address_line2 VARCHAR(255),
+
+city VARCHAR(100),
+
+state VARCHAR(100),
+
+pincode VARCHAR(10),
+
+country VARCHAR(100),
+
+FOREIGN KEY (admin_id) REFERENCES admins(admin_id) ON DELETE CASCADE
+
+);
+
+CREATE TABLE admin_login_accounts (
+
+admin_id BIGINT PRIMARY KEY,
+
+username VARCHAR(100) UNIQUE NOT NULL,
+
+password_hash TEXT NOT NULL,
+
+last_login TIMESTAMP,
+
+account_status VARCHAR(50),
+
+FOREIGN KEY (admin_id) REFERENCES admins(admin_id) ON DELETE CASCADE
+
+);
