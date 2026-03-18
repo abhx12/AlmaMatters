@@ -8,6 +8,10 @@ import Login from './components/loginpage';
 import HomePage from './components/HomePage';
 import PlaceholderPage from './components/PlaceholderPage';
 
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
+import Sessions from './components/Sessions';
+
 import StudentSignup from './components/StudentSignup';
 import AlumniSignup from './components/AlumniSignup';
 import AdminSignup from './components/AdminSignup';
@@ -29,16 +33,20 @@ function App() {
           {/* Home Page */}
           <Route path="/home" element={<HomePage />} />
 
-          {/* Navigation Placeholders */}
+          {/* Navigation Placeholders and Actual Pages */}
           <Route path="/search" element={<PlaceholderPage title="Search" />} />
           <Route path="/messages" element={<PlaceholderPage title="Message Inbox" />} />
-          <Route path="/sessions" element={<PlaceholderPage title="Sessions" />} />
+          <Route path="/sessions" element={<Sessions />} />
           <Route path="/progress" element={<PlaceholderPage title="Progress" />} />
           <Route path="/jobs" element={<PlaceholderPage title="Jobs" />} />
           <Route path="/communities" element={<PlaceholderPage title="Communities" />} />
 
-          {/* Login Page */}
+          {/* Login Pages */}
           <Route path="/login" element={<Login />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+
+          {/* Admin Dashboard */}
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
 
           {/* Main Signup Role Selection */}

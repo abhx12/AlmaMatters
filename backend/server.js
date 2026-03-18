@@ -10,6 +10,7 @@ const studentRoutes = require('./routes/studentRoutes');
 const alumniRoutes = require('./routes/alumniRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const postRoutes  = require('./routes/postRoutes');
+const sessionRoutes = require('./routes/sessionRoutes');
 
 const authRoutes = require('./routes/authRoutes');
 
@@ -29,6 +30,7 @@ app.use("/api/alumni", alumniRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/sessions", sessionRoutes);
 
 
 

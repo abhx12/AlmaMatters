@@ -1,6 +1,8 @@
 const { OAuth2Client } = require('google-auth-library');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const db = require('../database');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || "PLACEHOLDER_CLIENT_ID");
 
@@ -94,3 +96,100 @@ exports.verifyOtp = async (req, res) => {
         res.status(400).json({ message: "Invalid OTP" });
     }
 };
+
+exports.loginUnified = (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ message: "Username and password required." });
+
+    db.query(
+        `SELECT sla.student_id as id, sla.password_hash, sla.account_status,
+                spd.first_name, spd.full_name, spd.profile_photo_url as avatar, 'student' as type
+         FROM student_login_accounts sla
+         LEFT JOIN student_personal_details spd ON spd.student_id = sla.student_id
+         WHERE sla.username = ?`, 
+        [username],
+        (err, studentRows) => {
+            if (err) return res.status(500).json({ message: "Database error" });
+            
+            if (studentRows.length > 0) {
+                // Found Student
+                const user = studentRows[0];
+                if (user.account_status !== "ACTIVE") return res.status(403).json({ message: "Account inactive." });
+                if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ message: "Invalid credentials." });
+                
+                return res.json({
+                    message: "Login successful",
+                    student_id: user.id, // For legacy compat
+                    id: user.id,
+                    name: user.full_name || user.first_name || username,
+                    avatar: user.avatar,
+                    type: "student"
+                });
+            }
+
+            // Not found in students, check alumni
+            db.query(
+                `SELECT ala.alumni_id as id, ala.password_hash, ala.account_status,
+                        st.full_name as name, 'alumni' as type
+                 FROM alumni_login_accounts ala
+                 LEFT JOIN alumni a ON a.alumni_id = ala.alumni_id
+                 LEFT JOIN student_personal_details st ON st.student_id = a.student_id
+                 WHERE ala.username = ?`,
+                [username],
+                (err2, alumniRows) => {
+                    if (err2) return res.status(500).json({ message: "Database error" });
+                    
+                    if (alumniRows.length > 0) {
+                        const user = alumniRows[0];
+                        if (user.account_status !== "ACTIVE") return res.status(403).json({ message: "Account inactive." });
+                        if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ message: "Invalid credentials." });
+                        
+                        return res.json({
+                            message: "Login successful",
+                            id: user.id,
+                            name: user.name || username,
+                            avatar: null, // Alumni table currently doesn't have an avatar column
+                            type: "alumni"
+                        });
+                    }
+                    
+                    return res.status(401).json({ message: "Invalid username or password." });
+                }
+            );
+        }
+    );
+};
+
+exports.loginAdmin = (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ message: "Username and password required." });
+
+    db.query(
+        `SELECT ala.admin_id as id, ala.password_hash, ala.account_status,
+                apd.first_name, apd.full_name, apd.profile_photo_url as avatar
+         FROM admin_login_accounts ala
+         LEFT JOIN admin_personal_details apd ON apd.admin_id = ala.admin_id
+         WHERE ala.username = ?`,
+        [username],
+        (err, rows) => {
+            if (err) return res.status(500).json({ message: "Database error" });
+            
+            if (rows.length > 0) {
+                const user = rows[0];
+                if (user.account_status !== "ACTIVE") return res.status(403).json({ message: "Account inactive." });
+                if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ message: "Invalid credentials." });
+                
+                return res.json({
+                    message: "Login successful",
+                    id: user.id,
+                    name: user.full_name || user.first_name || username,
+                    avatar: user.avatar,
+                    type: "admin"
+                });
+            }
+            
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+    );
+};
+

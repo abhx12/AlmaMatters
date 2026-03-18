@@ -1,4 +1,5 @@
 const db = require("../database");
+const bcrypt = require("bcryptjs");
 
 exports.registerStep = (req, res) => {
     const { step, data, adminId } = req.body;
@@ -64,8 +65,11 @@ exports.registerStep = (req, res) => {
             (admin_id, username, password_hash, account_status)
             VALUES (?, ?, ?, ?)
         `;
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(data.password, salt);
+        
         db.query(sql, [
-            adminId, data.username, data.password, "ACTIVE"
+            adminId, data.username, hashedPassword, "ACTIVE"
         ], (err) => {
             if (err) return res.status(500).json({ message: "Error creating login" });
             res.json({ message: "Signup completed successfully" });

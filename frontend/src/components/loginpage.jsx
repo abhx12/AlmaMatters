@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./loginpage.css";
-import { loginStudent, verifyStudentEmail } from "./api";
+import { loginUnified, verifyStudentEmail } from "./api";
 
 /* ── OTP generator (crypto-safe, frontend only) ─────────────── */
 function generateOtp() {
@@ -55,10 +55,10 @@ export default function Login() {
         if (!password.trim()) { setError("Please enter your password."); return; }
         setLoading(true); clearError();
         try {
-            const user = await loginStudent(username, password);
+            const user = await loginUnified(username, password);
             sessionStorage.setItem("currentUser", JSON.stringify({
-                type: "student",
-                id: user.student_id,
+                type: user.type,
+                id: user.id,
                 name: user.name,
                 avatar: user.avatar,
             }));

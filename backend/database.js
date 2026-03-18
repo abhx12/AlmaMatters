@@ -1,26 +1,23 @@
 const mysql = require('mysql2');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'localhost@123',
-  database: 'almamatters',
-})
-db.connect((err)=>{
-
-if(err){
-
-console.log("Database connection failed", err);
-
-}
-
-else{
-
-console.log("MySQL Connected");
-
-}
-
+// Use a pool so controllers can call db.getConnection() for transactions
+// AND db.query() for simple fire-and-forget queries.
+const db = mysql.createPool({
+  host:              'localhost',
+  user:              'root',
+  password:          'localhost@123',
+  database:          'almamatters',
+  waitForConnections: true,
+  connectionLimit:    10,
 });
 
+db.getConnection((err, conn) => {
+  if (err) {
+    console.error('MySQL pool connection failed:', err.message);
+  } else {
+    console.log('MySQL Pool Connected');
+    conn.release();
+  }
+});
 
 module.exports = db;

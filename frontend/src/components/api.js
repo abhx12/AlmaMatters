@@ -48,9 +48,13 @@ STUDENT LOGIN APIs
 =====================================
 */
 
-/** Login with username + password */
-export const loginStudent = (username, password) =>
-  API.post("/students/login", { username, password }).then(res => res.data);
+/** Unified Login with username + password */
+export const loginUnified = (username, password) =>
+  API.post("/auth/login", { username, password }).then(res => res.data);
+
+/** Admin Login */
+export const loginAdmin = (username, password) =>
+  API.post("/auth/admin-login", { username, password }).then(res => res.data);
 
 /** Verify email belongs to a registered student (step 1 of OTP flow) */
 export const verifyStudentEmail = (email) =>
@@ -131,5 +135,22 @@ export const deleteComment = (postId, commentId) =>
 export const sharePost = (postId, sharer_type, sharer_id) =>
   API.post(`/posts/${postId}/share`, { sharer_type, sharer_id }).then(res => res.data);
 
+/*
+=====================================
+SESSIONS APIs
+=====================================
+*/
+
+export const requestSession = (data) =>
+  API.post("/sessions/request", data).then(res => res.data);
+
+export const getPendingSessions = () =>
+  API.get("/sessions/pending").then(res => res.data);
+
+export const getApprovedSessions = () =>
+  API.get("/sessions").then(res => res.data);
+
+export const updateSessionStatus = (sessionId, status) =>
+  API.put(`/sessions/${sessionId}/status`, { status }).then(res => res.data);
 
 export default API;

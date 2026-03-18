@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 import logo from '../assets/almamatterslogowithname.jpeg';
@@ -194,6 +194,8 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [mediaUrl, setMediaUrl] = useState('');
+
   const handleSubmit = async () => {
     if (!content.trim()) { setError('Post content cannot be empty.'); return; }
     if (!currentUser) { setError('You must be logged in to post.'); return; }
@@ -203,6 +205,7 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
         poster_type: currentUser.type,
         poster_id: currentUser.id,
         content,
+        media_url: mediaUrl || undefined
       });
       onCreated();
       onClose();
@@ -217,6 +220,14 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={e => e.stopPropagation()}>
         <h3>Create Post</h3>
+        <input 
+          type="text" 
+          placeholder="Image URL (optional)" 
+          className="comment-input" 
+          style={{marginBottom: '10px'}}
+          value={mediaUrl} 
+          onChange={e => setMediaUrl(e.target.value)} 
+        />
         <textarea
           className="post-textarea"
           placeholder="What's on your mind?"
@@ -225,7 +236,7 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
           rows={5}
         />
         {error && <p className="error-msg">{error}</p>}
-        <div className="modal-actions">
+        <div className="modal-actions" style={{marginTop:'15px'}}>
           <button className="modal-cancel-btn" onClick={onClose}>Cancel</button>
           <button className="modal-post-btn" onClick={handleSubmit} disabled={loading}>
             {loading ? 'Posting…' : 'Post'}
@@ -239,7 +250,7 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
 // ── HomePage ──────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate();
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState(() => sessionStorage.getItem('profilePic') || null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -253,7 +264,14 @@ export default function HomePage() {
 
   const handleProfileUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setProfilePic(URL.createObjectURL(e.target.files[0]));
+      const url = URL.createObjectURL(e.target.files[0]);
+      setProfilePic(url);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+         sessionStorage.setItem('profilePic', reader.result);
+      };
+      reader.readAsDataURL(e.target.files[0]);
     }
   };
 
