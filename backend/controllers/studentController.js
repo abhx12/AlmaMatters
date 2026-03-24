@@ -94,6 +94,19 @@ exports.registerFull = async (req, res) => {
              step6?.academic_status]
         );
 
+        // Verify global username uniqueness before insert
+        const [existing] = await connection.query(
+            `SELECT username FROM student_login_accounts WHERE username = ?
+             UNION
+             SELECT username FROM alumni_login_accounts WHERE username = ?
+             UNION
+             SELECT username FROM admin_login_accounts WHERE username = ?`,
+            [step7.username, step7.username, step7.username]
+        );
+        if (existing.length > 0) {
+            throw new Error("That username is already taken. Please choose another.");
+        }
+
         // STEP 7: login
         await connection.query(
             `INSERT INTO student_login_accounts

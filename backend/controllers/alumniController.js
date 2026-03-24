@@ -27,7 +27,10 @@ exports.registerStep = async (req, res) => {
 
             // Look up the student_id from the students table using roll_number
             const [studentRows] = await db.query(
-                "SELECT student_id FROM students WHERE roll_number = ?",
+                `SELECT s.student_id, sad.expected_graduation_date 
+                 FROM students s
+                 LEFT JOIN student_academic_details sad ON sad.student_id = s.student_id
+                 WHERE s.roll_number = ?`,
                 [data.roll_number.trim()]
             );
 
@@ -35,7 +38,20 @@ exports.registerStep = async (req, res) => {
                 return res.status(404).json({ message: "No student found with that roll number." });
             }
 
-            const studentId = studentRows[0].student_id;
+            const studentData = studentRows[0];
+            
+            // Validate graduation year
+            if (studentData.expected_graduation_date) {
+                if (new Date(studentData.expected_graduation_date) > new Date()) {
+                    return res.status(400).json({ message: "You have not graduated yet. Active students cannot register as Alumni." });
+                }
+            } else {
+                if (parseInt(data.graduation_year) > new Date().getFullYear()) {
+                    return res.status(400).json({ message: "You have not graduated yet. Active students cannot register as Alumni." });
+                }
+            }
+
+            const studentId = studentData.student_id;
 
             // Insert into alumni table
             const [result] = await db.query(
@@ -108,6 +124,19 @@ exports.registerStep = async (req, res) => {
 
         /* STEP 7 — LOGIN ACCOUNTS */
         else if (step === 7) {
+            // Verify global username uniqueness before insert
+            const [existing] = await db.query(
+                `SELECT username FROM student_login_accounts WHERE username = ?
+                 UNION
+                 SELECT username FROM alumni_login_accounts WHERE username = ?
+                 UNION
+                 SELECT username FROM admin_login_accounts WHERE username = ?`,
+                [data.username, data.username, data.username]
+            );
+            if (existing.length > 0) {
+                return res.status(400).json({ message: "That username is already taken. Please choose another." });
+            }
+
             // Hash the password before storing
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(data.password, salt);

@@ -15,6 +15,7 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 const userRoutes = require('./routes/userRoutes');
+const followRoutes = require('./routes/followRoutes');
 
 
 // MIDDLEWARE
@@ -33,6 +34,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/network", followRoutes);
+app.use("/api/jobs", require('./routes/jobRoutes'));
 
 
 

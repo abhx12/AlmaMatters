@@ -21,4 +21,8 @@ router.delete('/:postId/comments/:commentId',ctrl.deleteComment);
 // Shares
 router.post('/:postId/share', ctrl.sharePost);
 
+// User Profile
+router.get('/user/:userType/:userId', ctrl.getUserPosts);
+router.get('/user/:userType/:userId/activity', ctrl.getUserActivity);
+
 module.exports = router;

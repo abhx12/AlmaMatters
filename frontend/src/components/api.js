@@ -226,4 +226,28 @@ export const getUserActivity = (userType, userId, page = 1, limit = 20) =>
 export const getUserAttendedSessions = (userType, userId) =>
   API.get(`/sessions/user/${userType}/${userId}/attended`).then(res => res.data);
 
+/*
+=====================================
+JOBS APIs
+=====================================
+*/
+
+export const getActiveJobs = () =>
+  API.get('/jobs/active').then(res => res.data);
+
+export const getAlumniJobs = (alumniId) =>
+  API.get(`/jobs/alumni/${alumniId}`).then(res => res.data);
+
+export const createJob = (data) =>
+  API.post('/jobs', data).then(res => res.data);
+
+export const applyForJob = (jobId, data) =>
+  API.post(`/jobs/${jobId}/apply`, data).then(res => res.data);
+
+export const getJobApplications = (jobId) =>
+  API.get(`/jobs/${jobId}/applications`).then(res => res.data);
+
+export const updateApplicationStatus = (applicationId, status) =>
+  API.put(`/jobs/applications/${applicationId}/status`, { status }).then(res => res.data);
+
 export default API;

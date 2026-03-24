@@ -9,6 +9,8 @@ import SearchUsers from './components/SearchUsers';
 import UserProfile from './components/UserProfile';
 import PlaceholderPage from './components/PlaceholderPage';
 import Sessions from './components/Sessions';
+import JobsPage from './components/JobsPage';
+import AlumniJobsDashboard from './components/AlumniJobsDashboard';
 
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
@@ -43,7 +45,8 @@ function App() {
             <Route path="messages" element={<PlaceholderPage title="Message Inbox" />} />
             <Route path="sessions" element={<Sessions />} />
             <Route path="progress" element={<PlaceholderPage title="Progress" />} />
-            <Route path="jobs" element={<PlaceholderPage title="Jobs" />} />
+            <Route path="jobs" element={<JobsPage />} />
+            <Route path="alumni-jobs" element={<AlumniJobsDashboard />} />
             <Route path="communities" element={<PlaceholderPage title="Communities" />} />
           </Route>
         </Routes>

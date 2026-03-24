@@ -258,13 +258,43 @@ CREATE TABLE post_shares (
 -- =============================================
 -- FOLLOWERS
 -- =============================================
-CREATE TABLE user_followers (
+CREATE TABLE IF NOT EXISTS user_followers (
     follower_type ENUM('student', 'alumni', 'admin') NOT NULL,
     follower_id BIGINT NOT NULL,
     following_type ENUM('student', 'alumni', 'admin') NOT NULL,
     following_id BIGINT NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (follower_type, follower_id, following_type, following_id)
+);
+
+-- =============================================
+-- JOBS
+-- =============================================
+CREATE TABLE jobs (
+    job_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    alumni_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    required_skills TEXT,
+    stipend_salary VARCHAR(100),
+    expectations TEXT,
+    qualification VARCHAR(255),
+    application_deadline DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (alumni_id) REFERENCES alumni(alumni_id) ON DELETE CASCADE
+);
+
+CREATE TABLE job_applications (
+    application_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    job_id BIGINT NOT NULL,
+    applicant_type ENUM('student', 'alumni') NOT NULL,
+    applicant_id BIGINT NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_job_application (job_id, applicant_type, applicant_id),
+    FOREIGN KEY (job_id) REFERENCES jobs(job_id) ON DELETE CASCADE
 );
 
 -- =============================================
@@ -278,8 +308,28 @@ CREATE TABLE sessions (
     description TEXT,
     scheduled_at DATETIME,
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    approved_by_admin_id BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE session_applications (
+    application_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    session_id BIGINT NOT NULL,
+    applicant_type ENUM('student', 'alumni') NOT NULL,
+    applicant_id BIGINT NOT NULL,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_session_applicant (session_id, applicant_type, applicant_id),
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id) ON DELETE CASCADE
+);
+
+CREATE TABLE notifications (
+    notification_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_type ENUM('student', 'alumni', 'admin') NOT NULL,
+    user_id BIGINT NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =============================================

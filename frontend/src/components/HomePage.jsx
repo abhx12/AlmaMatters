@@ -194,9 +194,10 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
+  const [showMediaInput, setShowMediaInput] = useState(false);
 
   const handleSubmit = async () => {
-    if (!content.trim()) { setError('Post content cannot be empty.'); return; }
+    if (!content.trim() && !mediaUrl.trim()) { setError('Post must contain text or media.'); return; }
     if (!currentUser) { setError('You must be logged in to post.'); return; }
     setLoading(true);
     try {
@@ -216,28 +217,74 @@ function CreatePostModal({ currentUser, onClose, onCreated }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={e => e.stopPropagation()}>
-        <h3>Create Post</h3>
-        <input 
-          type="text" 
-          placeholder="Image URL (optional)" 
-          className="comment-input" 
-          style={{marginBottom: '10px'}}
-          value={mediaUrl} 
-          onChange={e => setMediaUrl(e.target.value)} 
-        />
-        <textarea
-          className="post-textarea"
-          placeholder="What's on your mind?"
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          rows={5}
-        />
-        {error && <p className="error-msg">{error}</p>}
-        <div className="modal-actions" style={{marginTop:'15px'}}>
-          <button className="modal-cancel-btn" onClick={onClose}>Cancel</button>
-          <button className="modal-post-btn" onClick={handleSubmit} disabled={loading}>
+    <div className="linkedin-modal-overlay" onClick={onClose}>
+      <div className="linkedin-modal-box" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="linkedin-modal-header">
+          <h2>Create a post</h2>
+          <button className="linkedin-modal-close" onClick={onClose}>✕</button>
+        </div>
+
+        {/* User Identity */}
+        <div className="linkedin-modal-user">
+          <Avatar name={currentUser?.username || 'User'} url={currentUser?.profilePic || sessionStorage.getItem('profilePic')} size={48} />
+          <div className="linkedin-modal-user-info">
+            <span className="linkedin-modal-name">{currentUser?.username || 'Unknown User'}</span>
+            <span className="linkedin-modal-privacy">Anyone ▾</span>
+          </div>
+        </div>
+
+        {/* Body Textarea */}
+        <div className="linkedin-modal-body">
+          <textarea
+            className="linkedin-post-textarea"
+            placeholder="What do you want to talk about?"
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = (e.target.scrollHeight) + 'px';
+            }}
+            rows={4}
+          />
+          
+          {showMediaInput && (
+            <input 
+              type="text" 
+              placeholder="Paste an Image URL here" 
+              className="linkedin-media-input" 
+              value={mediaUrl} 
+              onChange={e => setMediaUrl(e.target.value)} 
+              autoFocus
+            />
+          )}
+          {mediaUrl && (
+            <div className="linkedin-media-preview">
+              <img src={mediaUrl} alt="Attachment preview" onError={(e) => e.target.style.display='none'} />
+              <button className="linkedin-remove-media" onClick={() => setMediaUrl('')}>✕</button>
+            </div>
+          )}
+          {error && <p className="error-msg" style={{marginTop: '10px'}}>{error}</p>}
+        </div>
+
+        {/* Footer */}
+        <div className="linkedin-modal-footer">
+          <div className="linkedin-modal-tools">
+            <button 
+              className="linkedin-tool-btn" 
+              onClick={() => setShowMediaInput(!showMediaInput)}
+              title="Add media URL"
+            >
+              🖼️
+            </button>
+            <button className="linkedin-tool-btn" title="Coming soon">📅</button>
+            <button className="linkedin-tool-btn" title="Coming soon">📊</button>
+          </div>
+          <button 
+            className="linkedin-post-btn" 
+            onClick={handleSubmit} 
+            disabled={loading || (!content.trim() && !mediaUrl.trim())}
+          >
             {loading ? 'Posting…' : 'Post'}
           </button>
         </div>

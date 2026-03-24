@@ -31,15 +31,30 @@ exports.getFeed = async (req, res) => {
     const page  = Math.max(parseInt(req.query.page  || 1), 1);
     const limit = Math.min(parseInt(req.query.limit || 20), 50);
     const offset = (page - 1) * limit;
+    const { viewer_type, viewer_id } = req.query;
 
-    const [posts] = await db.execute(
-      `SELECT post_id, poster_type, poster_id, content, media_url,
-              like_count, comment_count, share_count, created_at
-       FROM posts
-       ORDER BY created_at DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
+    let query = `
+      SELECT p.post_id, p.poster_type, p.poster_id, p.content, p.media_url,
+             p.like_count, p.comment_count, p.share_count, p.created_at
+      FROM posts p
+      WHERE p.poster_type = ? AND p.poster_id = ?
+         OR EXISTS (
+           SELECT 1 FROM user_followers uf 
+           WHERE uf.follower_type = ? AND uf.follower_id = ? 
+             AND uf.following_type = p.poster_type AND uf.following_id = p.poster_id
+             AND uf.status = 'accepted'
+         )
+         OR ? = 'admin'
+      ORDER BY p.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [posts] = await db.execute(query, [
+      viewer_type || 'none', viewer_id || 0,
+      viewer_type || 'none', viewer_id || 0,
+      viewer_type || 'none',
+      limit, offset
+    ]);
 
     const enriched = await Promise.all(
       posts.map(async (post) => {
@@ -209,5 +224,78 @@ exports.sharePost = async (req, res) => {
   } catch (err) {
     console.error('sharePost error:', err);
     res.status(500).json({ success: false, message: 'Failed to share post' });
+  }
+};
+
+// GET /api/posts/user/:userType/:userId
+exports.getUserPosts = async (req, res) => {
+  try {
+    const { userType, userId } = req.params;
+    const page  = Math.max(parseInt(req.query.page  || 1), 1);
+    const limit = Math.min(parseInt(req.query.limit || 20), 50);
+    const offset = (page - 1) * limit;
+
+    const query = `
+      SELECT post_id, poster_type, poster_id, content, media_url,
+             like_count, comment_count, share_count, created_at
+      FROM posts
+      WHERE poster_type = ? AND poster_id = ?
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [posts] = await db.execute(query, [userType, userId, limit, offset]);
+
+    const enriched = await Promise.all(
+      posts.map(async (post) => {
+        const poster = await getPosterName(post.poster_type, post.poster_id);
+        return { ...post, poster_name: poster.name, poster_avatar: poster.profile_photo_url };
+      })
+    );
+
+    res.json({ success: true, posts: enriched, page, limit });
+  } catch (err) {
+    console.error('getUserPosts error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch user posts' });
+  }
+};
+
+// GET /api/posts/user/:userType/:userId/activity
+exports.getUserActivity = async (req, res) => {
+  try {
+    const { userType, userId } = req.params;
+    const page  = Math.max(parseInt(req.query.page  || 1), 1);
+    const limit = Math.min(parseInt(req.query.limit || 20), 50);
+    const offset = (page - 1) * limit;
+
+    const query = `
+      SELECT DISTINCT p.post_id, p.poster_type, p.poster_id, p.content, p.media_url,
+             p.like_count, p.comment_count, p.share_count, p.created_at
+      FROM posts p
+      LEFT JOIN post_likes pl ON p.post_id = pl.post_id
+      LEFT JOIN post_comments pc ON p.post_id = pc.post_id
+      WHERE (pl.liker_type = ? AND pl.liker_id = ?) 
+         OR (pc.commenter_type = ? AND pc.commenter_id = ?)
+      ORDER BY p.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [posts] = await db.execute(query, [
+      userType, userId,
+      userType, userId,
+      limit, offset
+    ]);
+
+    const enriched = await Promise.all(
+      posts.map(async (post) => {
+        const poster = await getPosterName(post.poster_type, post.poster_id);
+        return { ...post, poster_name: poster.name, poster_avatar: poster.profile_photo_url };
+      })
+    );
+
+    res.json({ success: true, posts: enriched, page, limit });
+  } catch (err) {
+    console.error('getUserActivity error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch user activity' });
   }
 };

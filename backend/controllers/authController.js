@@ -89,9 +89,11 @@ exports.loginUnified = async (req, res) => {
         // Check students
         const [studentRows] = await db.query(
             `SELECT sla.student_id as id, sla.password_hash, sla.account_status,
-                    spd.first_name, spd.full_name, spd.profile_photo_url as avatar, 'student' as type
+                    spd.first_name, spd.full_name, spd.profile_photo_url as avatar, 'student' as type,
+                    sad.expected_graduation_date
              FROM student_login_accounts sla
              LEFT JOIN student_personal_details spd ON spd.student_id = sla.student_id
+             LEFT JOIN student_academic_details sad ON sad.student_id = sla.student_id
              WHERE sla.username = ?`,
             [username]
         );
@@ -100,13 +102,23 @@ exports.loginUnified = async (req, res) => {
             const user = studentRows[0];
             if (user.account_status !== "ACTIVE") return res.status(403).json({ message: "Account inactive." });
             if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ message: "Invalid credentials." });
+            
+            let requiresTransition = false;
+            if (user.expected_graduation_date) {
+                // If the graduation date is in the past, they must transition to alumni
+                if (new Date(user.expected_graduation_date) < new Date()) {
+                    requiresTransition = true;
+                }
+            }
+
             return res.json({
                 message: "Login successful",
                 id: user.id,
                 name: user.full_name || user.first_name || username,
                 avatar: user.avatar,
                 type: "student",
-                username: username
+                username: username,
+                requires_alumni_transition: requiresTransition
             });
         }
 
